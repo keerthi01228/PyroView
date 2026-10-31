@@ -37,6 +37,18 @@ The current post-fire layer displays a single-date NBR image. It does **not** re
 - Terrarium elevation tiles for terrain visualization
 - Sentinel-2-derived image overlays
 
+## Data Sources and Attribution
+
+### Terrain Elevation
+
+Terrain visualization uses Terrarium-encoded elevation tiles hosted in the AWS `elevation-tiles-prod` S3 bucket.
+
+- **Dataset information:** [AWS Open Data Registry — Terrain Tiles](https://registry.opendata.aws/terrain-tiles/)
+- **Data documentation and attribution:** [Terrain Tiles documentation](https://github.com/tilezen/joerd/tree/master/docs)
+- **Attribution guidance:** [Terrain Tiles attribution requirements](https://github.com/tilezen/joerd/blob/master/docs/attribution.md)
+
+The Terrain Tiles dataset combines elevation data from underlying sources. Please consult its attribution guidance for the applicable credits.
+
 ## Run Locally
 
 1. Clone or download this repository.
