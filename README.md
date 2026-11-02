@@ -7,6 +7,11 @@ The project focuses on the Dixie Fire region of California in 2021. It combines 
 🌐 **Live Website:** [Explore PyroView](https://keerthi01228.github.io/PyroView/)
 
 > **Important:** PyroView is an exploratory visualization tool, not an official wildfire severity classification system or an emergency-warning service.
+## 🗺️ Interactive Map
+
+**[Open PyroView Interactive Map](https://keerthi01228.github.io/PyroView/map.html)**
+
+Explore the pre-fire and post-fire imagery using the interactive swipe comparison and terrain controls.
 
 ## Features
 
