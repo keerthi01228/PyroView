@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explore wildfire landscape change through satellite imagery, NBR visualisation, and terrain context with PyroView.">
+  <title>PyroView — Explore the evidence behind wildfire change</title>
+  <style>
+    :root {
+      --ink: #172b25;
+      --muted: #5d7068;
+      --forest: #174e3b;
+      --forest-dark: #10392c;
+      --mint: #e5f1e9;
+      --paper: #f7f8f4;
+      --line: #dce5de;
+      --orange: #ef8b42;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1160px, calc(100% - 40px)); margin: 0 auto; }
+    .nav {
+      height: 76px; display: flex; align-items: center; justify-content: space-between;
+      gap: 20px;
+    }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 850; font-size: 1.3rem; letter-spacing: -.04em; }
+    .brand-mark { width: 39px; height: 39px; display: grid; place-items: center; background: var(--mint); border-radius: 13px; font-size: 1.35rem; }
+    .nav-links { display: flex; gap: 27px; align-items: center; color: var(--muted); font-size: .93rem; }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--forest); }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 13px 19px; border-radius: 12px; border: 1px solid transparent;
+      text-decoration: none; font-weight: 750; font-size: .95rem; transition: transform .18s, background .18s;
+    }
+    .button:hover { transform: translateY(-2px); }
+    .button-primary { background: var(--forest); color: white; box-shadow: 0 8px 22px #174e3b20; }
+    .button-primary:hover { background: var(--forest-dark); }
+    .button-light { background: white; border-color: var(--line); color: var(--ink); }
+    .hero { padding: 48px 0 62px; }
+    .hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 52px; align-items: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 9px; padding: 7px 11px; border: 1px solid #d8e6dc; border-radius: 999px; color: var(--forest); background: #edf5ef; font-size: .78rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 21px 0 18px; max-width: 650px; font-size: clamp(2.8rem, 5vw, 4.75rem); line-height: 1.03; letter-spacing: -.065em; }
+    h1 span { color: var(--forest); }
+    .hero-copy { max-width: 570px; color: var(--muted); font-size: 1.12rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .micro-note { margin-top: 17px; font-size: .82rem; color: #718078; }
+    .visual {
+      position: relative; min-height: 430px; overflow: hidden; border-radius: 27px;
+      background: #dfe9df; border: 1px solid #d9e4da; box-shadow: 0 24px 70px #203c2b16;
+    }
+    .visual:before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 18% 28%, #8bbd7e 0 11%, transparent 11.5%),
+        radial-gradient(ellipse at 77% 25%, #9bc98b 0 13%, transparent 13.5%),
+        radial-gradient(ellipse at 64% 76%, #b7d6a2 0 18%, transparent 18.5%),
+        radial-gradient(ellipse at 22% 79%, #a7cd99 0 15%, transparent 15.5%),
+        linear-gradient(130deg, #dfead5 0%, #c4dfb6 48%, #edf0df 49%, #dbe8d1 100%);
+    }
+    .terrain-line { position: absolute; inset: -10%; opacity: .6; background: repeating-radial-gradient(ellipse at 48% 53%, transparent 0 22px, #789c78 23px 24px, transparent 25px 43px); transform: rotate(-14deg) scale(1.2); }
+    .satellite-card { position: absolute; left: 7%; top: 8%; width: 57%; height: 70%; border: 5px solid #fff; border-radius: 17px; overflow: hidden; box-shadow: 0 16px 40px #263f2c2c; transform: rotate(-3deg); background: #c1d2a0; }
+    .satellite-card:before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 20%, #7d9a65 20% 33%, transparent 33% 42%, #b0c68a 42% 61%, transparent 61%), repeating-linear-gradient(28deg, #d8d6ae 0 15px, #9db87c 16px 31px, #c4ce9d 32px 48px); filter: saturate(.75); }
+    .satellite-card:after { content: "PRE-FIRE / POST-FIRE"; position: absolute; left: 12px; bottom: 12px; background: #142d23e8; color: white; padding: 8px 10px; border-radius: 7px; font-size: .68rem; font-weight: 800; letter-spacing: .1em; }
+    .compare-line { position: absolute; top: 0; bottom: 0; left: 58%; width: 3px; background: white; box-shadow: 0 0 0 1px #253b2c20; }
+    .compare-knob { position: absolute; top: 47%; left: calc(58% - 22px); width: 47px; height: 47px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--forest); font-size: 1.15rem; box-shadow: 0 6px 20px #1e352c2b; }
+    .floating-note { position: absolute; right: 5%; bottom: 8%; max-width: 205px; padding: 16px; background: #ffffffed; border: 1px solid #ffffff; border-radius: 15px; box-shadow: 0 12px 35px #203c2b18; }
+    .floating-note strong { display: block; font-size: .92rem; }
+    .floating-note small { display: block; color: var(--muted); margin-top: 4px; }
+    .mini-pill { display: inline-block; margin-bottom: 8px; padding: 4px 7px; border-radius: 6px; background: #e8f3eb; color: var(--forest); font-size: .68rem; font-weight: 850; letter-spacing: .08em; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 35px; }
+    .stat { padding: 16px 17px; border: 1px solid var(--line); border-radius: 15px; background: #ffffffb8; }
+    .stat strong { display: block; font-size: 1.05rem; }
+    .stat span { color: var(--muted); font-size: .81rem; }
+    section { padding: 76px 0; }
+    .section-head { max-width: 720px; margin-bottom: 30px; }
+    .section-head h2 { margin: 12px 0; font-size: clamp(2rem, 3vw, 2.8rem); letter-spacing: -.045em; line-height: 1.1; }
+    .section-head p { color: var(--muted); font-size: 1.02rem; }
+    .problem-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 42px; align-items: start; }
+    .quote-card { padding: 27px; background: var(--forest); color: white; border-radius: 21px; }
+    .quote-card .big { font-size: 1.5rem; line-height: 1.28; letter-spacing: -.035em; font-weight: 800; }
+    .quote-card p { color: #d6e5dc; font-size: .92rem; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature { padding: 24px; border: 1px solid var(--line); background: white; border-radius: 18px; }
+    .feature-icon { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 13px; background: var(--mint); font-size: 1.2rem; }
+    .feature h3 { margin: 17px 0 8px; font-size: 1.05rem; }
+    .feature p { margin: 0; color: var(--muted); font-size: .91rem; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+    .step { padding: 20px; border-top: 3px solid #8eb39a; background: white; border-radius: 0 0 15px 15px; }
+    .step-num { color: var(--forest); font-weight: 900; font-size: .76rem; letter-spacing: .12em; }
+    .step h3 { font-size: 1rem; margin: 11px 0 6px; }
+    .step p { color: var(--muted); font-size: .87rem; margin: 0; }
+    .limits { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .limit-card { padding: 23px; border-radius: 17px; background: white; border: 1px solid var(--line); }
+    .limit-card h3 { margin-top: 0; }
+    .limit-card p, .limit-card li { color: var(--muted); font-size: .92rem; }
+    .cta { padding: 36px; display: flex; justify-content: space-between; align-items: center; gap: 25px; background: #e6f0e8; border: 1px solid #d5e4d9; border-radius: 24px; }
+    .cta h2 { margin: 0 0 8px; font-size: clamp(1.7rem, 3vw, 2.35rem); letter-spacing: -.04em; }
+    .cta p { margin: 0; color: var(--muted); }
+    footer { padding: 28px 0 35px; border-top: 1px solid var(--line); color: var(--muted); font-size: .83rem; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+    @media (max-width: 850px) {
+      .hero-grid, .problem-grid { grid-template-columns: 1fr; }
+      .visual { min-height: 370px; }
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .nav-links a:not(.button) { display: none; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 28px, 1160px); }
+      .nav { height: 66px; }
+      .nav .button { padding: 10px 12px; font-size: .82rem; }
+      .hero { padding: 34px 0 45px; }
+      .visual { min-height: 300px; }
+      .stats, .feature-grid, .steps, .limits { grid-template-columns: 1fr; }
+      .stat { padding: 13px; }
+      section { padding: 53px 0; }
+      .cta, .footer-inner { flex-direction: column; align-items: flex-start; }
+      .cta { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap nav">
+    <a class="brand" href="#" aria-label="PyroView home">
+      <span class="brand-mark">🔥</span><span>PyroView</span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#about">About</a>
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a class="button button-primary" href="index.html">Explore the map <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">🛰️ Wildfire imagery explorer</span>
+          <h1>Explore the landscape <span>before and after</span> a wildfire.</h1>
+          <p class="hero-copy">PyroView brings satellite imagery and terrain context together to help people explore visible landscape change around the 2021 Dixie Fire in California.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="index.html">Start exploring <span aria-hidden="true">→</span></a>
+            <a class="button button-light" href="#features">Discover the features</a>
+          </div>
+          <p class="micro-note">An interactive exploration of imagery and evidence—not an official fire-severity assessment.</p>
+          <div class="stats" aria-label="Project overview">
+            <div class="stat"><strong>Dixie Fire</strong><span>California, 2021</span></div>
+            <div class="stat"><strong>Jul 08 → Aug 27</strong><span>Imagery dates shown</span></div>
+            <div class="stat"><strong>Swipe + terrain</strong><span>Explore the map</span></div>
+          </div>
+        </div>
+        <div class="visual" role="img" aria-label="Illustrative satellite-style landscape comparison graphic">
+          <div class="terrain-line"></div>
+          <div class="satellite-card"></div>
+          <div class="compare-line"></div>
+          <div class="compare-knob" aria-hidden="true">‹ ›</div>
+          <div class="floating-note">
+            <span class="mini-pill">FIELD GUIDE</span>
+            <strong>Look closer. Compare carefully.</strong>
+            <small>Explore imagery, terrain, and the limits of what the data can tell us.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" style="background:#eef3ed">
+      <div class="wrap problem-grid">
+        <div class="section-head">
+          <span class="eyebrow">Why PyroView?</span>
+          <h2>Satellite images are powerful. Understanding them matters.</h2>
+          <p>Looking at two images side by side can be difficult without context. PyroView gives visitors a guided way to compare the available imagery, explore terrain, and understand what the visualisation does—and does not—show.</p>
+        </div>
+        <div class="quote-card">
+          <div class="big">From a map you can move, to evidence you can understand.</div>
+          <p>PyroView combines a before-and-after view with terrain controls and explanations, so exploration has a clear purpose instead of being just a collection of map tools.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Built for exploration</span>
+          <h2>Everything has a reason to be here.</h2>
+          <p>Focused features designed around the imagery and the study area—not generic dashboard metrics.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature"><div class="feature-icon">⇆</div><h3>Before-and-after comparison</h3><p>Use the swipe divider to compare the pre-fire RGB image with the post-fire NBR visualisation.</p></article>
+          <article class="feature"><div class="feature-icon">⛰</div><h3>Terrain exploration</h3><p>Toggle 3D terrain and adjust exaggeration to explore topographic context around the study area.</p></article>
+          <article class="feature"><div class="feature-icon">🧭</div><h3>Guided chapters</h3><p>Move through a structured exploration of the study area, imagery, terrain, and evidence limitations.</p></article>
+          <article class="feature"><div class="feature-icon">🛰</div><h3>Satellite imagery context</h3><p>See the dates and type of imagery used, so the comparison has a clear time and data context.</p></article>
+          <article class="feature"><div class="feature-icon">📘</div><h3>Understand NBR</h3><p>Learn what the Normalized Burn Ratio is used to investigate and why a rendered image needs careful interpretation.</p></article>
+          <article class="feature"><div class="feature-icon">✓</div><h3>Transparent limitations</h3><p>Clear notes distinguish a single-date visualisation from a verified or official burn-severity classification.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works" style="background:#eef3ed">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Your exploration path</span>
+          <h2>Four steps. One clearer view.</h2>
+        </div>
+        <div class="steps">
+          <article class="step"><span class="step-num">STEP 01</span><h3>Get oriented</h3><p>Start with the Dixie Fire study area and the dates of the imagery.</p></article>
+          <article class="step"><span class="step-num">STEP 02</span><h3>Compare imagery</h3><p>Move the swipe divider to inspect the two displayed image products.</p></article>
+          <article class="step"><span class="step-num">STEP 03</span><h3>Explore terrain</h3><p>Enable terrain and adjust the exaggeration to see topographic context.</p></article>
+          <article class="step"><span class="step-num">STEP 04</span><h3>Read the evidence</h3><p>Review the method and limitations before drawing conclusions.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Responsible interpretation</span>
+          <h2>What PyroView can—and cannot—tell you.</h2>
+          <p>Good geospatial tools make their evidence and limitations visible.</p>
+        </div>
+        <div class="limits">
+          <article class="limit-card"><h3>What you can explore</h3><ul><li>The displayed pre-fire RGB image and post-fire NBR visualisation.</li><li>The difference in appearance between the two dated image products.</li><li>The surrounding terrain context and map framing.</li></ul></article>
+          <article class="limit-card"><h3>What you should not assume</h3><ul><li>This page does not provide an official burn-severity classification.</li><li>The displayed colours alone do not verify severity at a location.</li><li>The two image dates do not, by themselves, establish the cause of every visible change.</li></ul></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="cta">
+          <div><h2>Ready to explore the Dixie Fire imagery?</h2><p>Open the interactive map and investigate the comparison for yourself.</p></div>
+          <a class="button button-primary" href="index.html">Open PyroView Explorer <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div><strong>PyroView</strong> · Wildfire Evidence Explorer</div>
+      <div>Educational visualisation. Not an official burn-severity assessment.</div>
+    </div>
+  </footer>
+</body>
+</html>
