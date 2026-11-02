@@ -4,6 +4,8 @@ PyroView is a browser-based geospatial visualization project for exploring satel
 
 The project focuses on the Dixie Fire region of California in 2021. It combines pre-fire satellite imagery, a post-fire Normalized Burn Ratio (NBR) visualization, and interactive terrain exploration in a single map interface.
 
+🌐 **Live Website:** [Explore PyroView](https://keerthi01228.github.io/PyroView/)
+
 > **Important:** PyroView is an exploratory visualization tool, not an official wildfire severity classification system or an emergency-warning service.
 
 ## Features
@@ -28,16 +30,29 @@ NBR is calculated from near-infrared (NIR) and shortwave-infrared (SWIR) reflect
 
 The current post-fire layer displays a single-date NBR image. It does **not** represent differenced NBR (dNBR), and its colors should not be interpreted as verified or official burn-severity categories.
 
-## Technology
+## Architecture and Technology
 
-- HTML, CSS, and JavaScript
-- MapLibre GL JS
-- MapLibre GL Compare
-- OpenFreeMap basemap
-- Terrarium elevation tiles for terrain visualization
-- Sentinel-2-derived image overlays
+- **Frontend:** HTML, CSS, and JavaScript
+- **Website hosting:** GitHub Pages
+- **Interactive mapping:** MapLibre GL JS
+- **Swipe comparison:** MapLibre GL Compare
+- **Basemap:** OpenFreeMap
+- **Satellite imagery:** Pre-fire RGB and post-fire NBR image overlays hosted in Amazon S3
+- **Terrain visualization:** Terrarium-encoded elevation tiles
+
+The browser loads the website and retrieves the map styles, imagery, and terrain resources required to display the interactive visualization.
 
 ## Data Sources and Attribution
+
+### Satellite Imagery
+
+The project uses pre-fire RGB imagery and a post-fire NBR visualization for the Dixie Fire region.
+
+- **Pre-fire scene date:** July 8, 2021
+- **Post-fire scene date:** August 27, 2021
+- **Source:** Sentinel-2-derived imagery
+
+Specific scene identifiers, processing details, and complete imagery attribution should be documented when available.
 
 ### Terrain Elevation
 
@@ -49,6 +64,13 @@ Terrain visualization uses Terrarium-encoded elevation tiles hosted in the AWS `
 
 The Terrain Tiles dataset combines elevation data from underlying sources. Please consult its attribution guidance for the applicable credits.
 
+### Map Services
+
+- **Basemap:** [OpenFreeMap](https://openfreemap.org/)
+- **Map rendering:** [MapLibre GL JS](https://maplibre.org/)
+
+Please consult the relevant service documentation for attribution requirements and usage terms.
+
 ## Run Locally
 
 1. Clone or download this repository.
@@ -56,18 +78,34 @@ The Terrain Tiles dataset combines elevation data from underlying sources. Pleas
 3. Start the page using the Live Server extension.
 4. Open the local URL provided by Live Server in your browser.
 
-An internet connection is required to load the externally hosted map styles, map libraries, and terrain resources.
+An internet connection is required to load the externally hosted map styles, map libraries, imagery, and terrain resources.
+
+## Screenshots
+
+Screenshots can be added here to demonstrate the application's interface and functionality.
+
+Recommended screenshots:
+
+- PyroView landing page.
+- Interactive map showing the pre-fire and post-fire comparison.
+- Interactive terrain visualization.
 
 ## Limitations
 
 - The imagery is provided for visualization and exploration.
 - A single-date NBR image alone does not establish official burn severity.
 - The application is not intended for emergency response or operational risk decisions.
-- The displayed map depends on the availability of external tile and map services.
+- The displayed map depends on the availability of external tile, map, and imagery services.
+- The availability of the live website depends on the hosting service.
 
 ## Project Status
 
-The interactive map and its core comparison and terrain controls have been implemented. Further work may include improving data documentation, validating imagery and masking, refining the legend, and publishing a hosted version.
+- Landing page published using GitHub Pages.
+- Interactive map and its core comparison and terrain controls implemented.
+- Satellite imagery hosted in Amazon S3.
+- Public website URL available for accessing the project.
+
+The landing page and interactive map navigation should be tested together to confirm that all website features work correctly in the published version.
 
 ## License
 
